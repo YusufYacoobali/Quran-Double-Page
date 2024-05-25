@@ -34,6 +34,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   void initState() {
     super.initState();
     pdfPathFuture = loadPDFFromAsset('assets/quran_source_v.pdf');
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   Future<String> loadPDFFromAsset(String assetPath) async {
@@ -76,7 +77,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                 return PDFView(
                   filePath: pdfPath,
                   swipeHorizontal: true,
-                  fitPolicy: FitPolicy.HEIGHT,
+                  fitPolicy: isPortrait ? FitPolicy.WIDTH : FitPolicy.HEIGHT,
                   onError: (error) {
                     print('PDF loading error: $error');
                   },
