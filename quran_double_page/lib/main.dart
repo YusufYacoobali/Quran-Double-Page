@@ -53,7 +53,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
           final bool isPortrait = orientation == Orientation.portrait;
           final String assetPath = isPortrait
               ? 'assets/quran_source_v.pdf'
-              : 'assets/quran_source_double_spaced.pdf';
+              : 'assets/quran_source_double_close.pdf';
 
           // Update the pdfPathFuture based on orientation change
           pdfPathFuture = loadPDFFromAsset(assetPath);
@@ -76,6 +76,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                 return PDFView(
                   filePath: pdfPath,
                   swipeHorizontal: true,
+                  fitPolicy: FitPolicy.HEIGHT,
                   onError: (error) {
                     print('PDF loading error: $error');
                   },
