@@ -28,32 +28,21 @@ class MyPDFViewer extends StatefulWidget {
 }
 
 class _MyPDFViewerState extends State<MyPDFViewer> {
-  String? portraitPdfPath;
-  String? landscapePdfPath;
+  late Future<String> pdfPathFuture;
 
   @override
   void initState() {
     super.initState();
-    loadPDFFromAsset('assets/quran_source_v.pdf', isLandscape: false);
-    loadPDFFromAsset('assets/quran_source_double_spaced.pdf',
-        isLandscape: true);
+    pdfPathFuture = loadPDFFromAsset('assets/quran_source_v.pdf');
   }
 
-  Future<void> loadPDFFromAsset(String assetPath,
-      {required bool isLandscape}) async {
+  Future<String> loadPDFFromAsset(String assetPath) async {
     final ByteData data = await rootBundle.load(assetPath);
     final Directory tempDir = await getTemporaryDirectory();
-    final File tempFile = File(
-        '${tempDir.path}/${isLandscape ? 'quran_source_double_spaced.pdf' : 'quran_source_v.pdf'}');
+    final File tempFile = File('${tempDir.path}/${assetPath.split('/').last}');
     await tempFile.writeAsBytes(data.buffer.asUint8List(), flush: true);
-    setState(() {
-      if (isLandscape) {
-        landscapePdfPath = tempFile.path;
-      } else {
-        portraitPdfPath = tempFile.path;
-      }
-      print('PDF loaded successfully: ${tempFile.path}');
-    });
+    print('PDF loaded successfully: ${tempFile.path}');
+    return tempFile.path;
   }
 
   @override
@@ -61,22 +50,32 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     return Scaffold(
       body: OrientationBuilder(
         builder: (context, orientation) {
-          final String? pdfPath = orientation == Orientation.portrait
-              ? portraitPdfPath
-              : landscapePdfPath;
+          final bool isPortrait = orientation == Orientation.portrait;
+          final String assetPath = isPortrait
+              ? 'assets/quran_source_v.pdf'
+              : 'assets/quran_source_double_spaced.pdf';
 
-          // Print statement to indicate which PDF is being displayed
-          if (orientation == Orientation.portrait) {
-            print('Displaying portrait PDF: $portraitPdfPath');
-          } else {
-            print('Displaying landscape PDF: $landscapePdfPath');
-          }
+          // Update the pdfPathFuture based on orientation change
+          pdfPathFuture = loadPDFFromAsset(assetPath);
 
-          return pdfPath != null
-              ? PDFView(
-                  filePath: pdfPath!,
+          return FutureBuilder<String>(
+            future: pdfPathFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error loading PDF: ${snapshot.error}'),
+                );
+              } else {
+                final String pdfPath = snapshot.data!;
+                print('Displaying PDF: $pdfPath');
+
+                return PDFView(
+                  filePath: pdfPath,
                   swipeHorizontal: true,
-                  //fitPolicy: FitPolicy.BOTH,
                   onError: (error) {
                     print('PDF loading error: $error');
                   },
@@ -86,15 +85,16 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                   onViewCreated: (PDFViewController controller) {
                     print('PDF loading successful!');
                   },
-                )
-              : const Center(
-                  child: CircularProgressIndicator(),
                 );
+              }
+            },
+          );
         },
       ),
     );
   }
 }
+
 
 
 
