@@ -32,8 +32,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   PDFViewController? _pdfViewController;
   int _totalPages = 0;
   int _currentPage = 0;
-
-  final ValueNotifier<bool> _isPortraitNotifier = ValueNotifier(true);
+  bool _isPortrait = true;
 
   @override
   void initState() {
@@ -69,7 +68,11 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     return Scaffold(
       body: OrientationBuilder(
         builder: (context, orientation) {
-          _isPortraitNotifier.value = orientation == Orientation.portrait;
+          bool isPortrait = orientation == Orientation.portrait;
+          if (_isPortrait != isPortrait) {
+            _isPortrait = isPortrait;
+            _pdfViewController = null; // Reset controller to force rebuild
+          }
 
           return FutureBuilder<Map<String, String>>(
             future: pdfPathsFuture,
@@ -83,7 +86,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                   child: Text('Error loading PDF: ${snapshot.error}'),
                 );
               } else {
-                final String pdfPath = _isPortraitNotifier.value
+                final String pdfPath = isPortrait
                     ? snapshot.data!['portrait']!
                     : snapshot.data!['landscape']!;
                 print('Displaying PDF: $pdfPath');
@@ -91,20 +94,22 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                 return Stack(
                   children: [
                     PDFView(
+                      key: ValueKey(pdfPath), // Force reload by changing key
                       filePath: pdfPath,
                       swipeHorizontal: true,
-                      fitPolicy: _isPortraitNotifier.value
-                          ? FitPolicy.WIDTH
-                          : FitPolicy.HEIGHT,
+                      fitPolicy:
+                          isPortrait ? FitPolicy.WIDTH : FitPolicy.HEIGHT,
                       onRender: (pages) {
                         setState(() {
                           _totalPages = pages!;
+                          // Restore the current page after rendering
+                          _pdfViewController?.setPage(_currentPage);
                         });
                       },
                       onViewCreated: (PDFViewController controller) {
-                        setState(() {
-                          _pdfViewController = controller;
-                        });
+                        _pdfViewController = controller;
+                        // Restore the current page when view is created
+                        _pdfViewController?.setPage(_currentPage);
                       },
                       onPageChanged: (page, total) {
                         setState(() {
