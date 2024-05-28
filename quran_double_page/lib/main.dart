@@ -92,6 +92,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                 print('Displaying PDF: $pdfPath');
 
                 return Stack(
+                  alignment: Alignment.center,
                   children: [
                     PDFView(
                       key: ValueKey(pdfPath), // Force reload by changing key
