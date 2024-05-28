@@ -125,11 +125,15 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                     ),
                     if (_totalPages > 0)
                       Positioned(
-                        bottom: 16,
-                        left: 16,
-                        right: 16,
+                        bottom: 10,
+                        left: 10,
+                        right: 10,
                         child: Row(
                           children: [
+                            Text(
+                              '${MediaQuery.of(context).orientation == Orientation.landscape ? ((_totalPages - _currentPage) * 2 - 1) : (_totalPages - _currentPage)}/${MediaQuery.of(context).orientation == Orientation.landscape ? (_totalPages * 2 - 1) : _totalPages}',
+                              style: TextStyle(color: Colors.black),
+                            ),
                             Expanded(
                               child: Slider(
                                 value: _currentPage.toDouble(),
@@ -143,10 +147,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                   });
                                 },
                               ),
-                            ),
-                            Text(
-                              '${_currentPage + 1}/$_totalPages',
-                              style: TextStyle(color: Colors.white),
                             ),
                           ],
                         ),
