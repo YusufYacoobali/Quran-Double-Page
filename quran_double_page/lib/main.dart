@@ -97,8 +97,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                       key: ValueKey(pdfPath), // Force reload by changing key
                       filePath: pdfPath,
                       swipeHorizontal: true,
-                      fitPolicy:
-                          isPortrait ? FitPolicy.WIDTH : FitPolicy.HEIGHT,
+                      fitPolicy: FitPolicy.BOTH,
                       onRender: (pages) {
                         setState(() {
                           _totalPages = pages!;
