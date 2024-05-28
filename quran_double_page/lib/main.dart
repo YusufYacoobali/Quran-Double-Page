@@ -28,22 +28,40 @@ class MyPDFViewer extends StatefulWidget {
 }
 
 class _MyPDFViewerState extends State<MyPDFViewer> {
-  late Future<String> pdfPathFuture;
+  late Future<Map<String, String>> pdfPathsFuture;
+  PDFViewController? _pdfViewController;
+  int _totalPages = 0;
+  int _currentPage = 0;
+
+  final ValueNotifier<bool> _isPortraitNotifier = ValueNotifier(true);
 
   @override
   void initState() {
     super.initState();
-    pdfPathFuture = loadPDFFromAsset('assets/quran_source_v.pdf');
+    pdfPathsFuture = loadPDFFromAssets();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
-  Future<String> loadPDFFromAsset(String assetPath) async {
-    final ByteData data = await rootBundle.load(assetPath);
+  Future<Map<String, String>> loadPDFFromAssets() async {
+    final ByteData dataPortrait =
+        await rootBundle.load('assets/quran_source_v.pdf');
+    final ByteData dataLandscape =
+        await rootBundle.load('assets/quran_source_double_close.pdf');
     final Directory tempDir = await getTemporaryDirectory();
-    final File tempFile = File('${tempDir.path}/${assetPath.split('/').last}');
-    await tempFile.writeAsBytes(data.buffer.asUint8List(), flush: true);
-    print('PDF loaded successfully: ${tempFile.path}');
-    return tempFile.path;
+
+    final File tempFilePortrait = File('${tempDir.path}/quran_source_v.pdf');
+    await tempFilePortrait.writeAsBytes(dataPortrait.buffer.asUint8List(),
+        flush: true);
+
+    final File tempFileLandscape =
+        File('${tempDir.path}/quran_source_double_close.pdf');
+    await tempFileLandscape.writeAsBytes(dataLandscape.buffer.asUint8List(),
+        flush: true);
+
+    return {
+      'portrait': tempFilePortrait.path,
+      'landscape': tempFileLandscape.path,
+    };
   }
 
   @override
@@ -51,16 +69,10 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     return Scaffold(
       body: OrientationBuilder(
         builder: (context, orientation) {
-          final bool isPortrait = orientation == Orientation.portrait;
-          final String assetPath = isPortrait
-              ? 'assets/quran_source_v.pdf'
-              : 'assets/quran_source_double_close.pdf';
+          _isPortraitNotifier.value = orientation == Orientation.portrait;
 
-          // Update the pdfPathFuture based on orientation change
-          pdfPathFuture = loadPDFFromAsset(assetPath);
-
-          return FutureBuilder<String>(
-            future: pdfPathFuture,
+          return FutureBuilder<Map<String, String>>(
+            future: pdfPathsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -71,22 +83,70 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                   child: Text('Error loading PDF: ${snapshot.error}'),
                 );
               } else {
-                final String pdfPath = snapshot.data!;
+                final String pdfPath = _isPortraitNotifier.value
+                    ? snapshot.data!['portrait']!
+                    : snapshot.data!['landscape']!;
                 print('Displaying PDF: $pdfPath');
 
-                return PDFView(
-                  filePath: pdfPath,
-                  swipeHorizontal: true,
-                  fitPolicy: isPortrait ? FitPolicy.WIDTH : FitPolicy.HEIGHT,
-                  onError: (error) {
-                    print('PDF loading error: $error');
-                  },
-                  onPageError: (page, error) {
-                    print('Error on page $page: $error');
-                  },
-                  onViewCreated: (PDFViewController controller) {
-                    print('PDF loading successful!');
-                  },
+                return Stack(
+                  children: [
+                    PDFView(
+                      filePath: pdfPath,
+                      swipeHorizontal: true,
+                      fitPolicy: _isPortraitNotifier.value
+                          ? FitPolicy.WIDTH
+                          : FitPolicy.HEIGHT,
+                      onRender: (pages) {
+                        setState(() {
+                          _totalPages = pages!;
+                        });
+                      },
+                      onViewCreated: (PDFViewController controller) {
+                        setState(() {
+                          _pdfViewController = controller;
+                        });
+                      },
+                      onPageChanged: (page, total) {
+                        setState(() {
+                          _currentPage = page!;
+                        });
+                      },
+                      onError: (error) {
+                        print('PDF loading error: $error');
+                      },
+                      onPageError: (page, error) {
+                        print('Error on page $page: $error');
+                      },
+                    ),
+                    if (_totalPages > 0)
+                      Positioned(
+                        bottom: 16,
+                        left: 16,
+                        right: 16,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Slider(
+                                value: _currentPage.toDouble(),
+                                min: 0,
+                                max: (_totalPages - 1).toDouble(),
+                                onChanged: (value) async {
+                                  final int pageNumber = value.toInt();
+                                  await _pdfViewController?.setPage(pageNumber);
+                                  setState(() {
+                                    _currentPage = pageNumber;
+                                  });
+                                },
+                              ),
+                            ),
+                            Text(
+                              '${_currentPage + 1}/$_totalPages',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 );
               }
             },
