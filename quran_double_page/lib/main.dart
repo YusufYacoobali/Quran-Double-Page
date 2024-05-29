@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -37,41 +35,38 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   int _currentPage = 0;
   bool _isPortrait = true;
   bool _orientationChanging = false;
-  bool _isScrollbarVisible = true; // Track if scrollbar is visible
-  Timer? _scrollbarTimer; // Timer to hide scrollbar
+  bool _isScrollbarVisible = true; // State for scrollbar visibility
+  Timer? _hideScrollbarTimer; // Timer to hide the scrollbar
 
   @override
   void initState() {
     super.initState();
     pdfPathsFuture = loadPDFFromAssets();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
-    // Start the timer when the widget is initialized
-    _startScrollbarTimer();
+    _startHideScrollbarTimer(); // Start the timer when the widget initializes
   }
 
   @override
   void dispose() {
-    _scrollbarTimer?.cancel(); // Cancel the timer to avoid memory leaks
+    _hideScrollbarTimer?.cancel(); // Cancel the timer when disposing
     super.dispose();
   }
 
-  // Function to start the timer to hide the scrollbar after a few seconds
-  void _startScrollbarTimer() {
-    setState(() {
-      _isScrollbarVisible = true;
-    });
-    _scrollbarTimer = Timer(Duration(seconds: 3), () {
+  void _startHideScrollbarTimer() {
+    _hideScrollbarTimer?.cancel(); // Cancel any existing timer
+    _hideScrollbarTimer = Timer(Duration(seconds: 4), () {
       setState(() {
-        _isScrollbarVisible = false; // Hide the scrollbar
+        _isScrollbarVisible = false;
       });
     });
   }
 
-  // Function to reset the timer
-  void _resetScrollbarTimer() {
-    _scrollbarTimer?.cancel(); // Cancel the current timer
-    _startScrollbarTimer(); // Start a new timer
+  void _onScreenTap() {
+    print('screen tapped');
+    setState(() {
+      _isScrollbarVisible = true;
+    });
+    _startHideScrollbarTimer(); // Restart the timer when screen is tapped
   }
 
   Future<Map<String, String>> loadPDFFromAssets() async {
@@ -99,19 +94,19 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        print('TAP DETECTED');
-        // Reset the scrollbar timer on tap
-        //_resetScrollbarTimer();
-        setState(() {
-          _isScrollbarVisible = true; // Show the scrollbar
-        });
-      },
+      behavior: HitTestBehavior.translucent, // Ensure gesture detection
+      onTap: _onScreenTap,
       child: Scaffold(
-        body: Stack(
-          alignment: Alignment.center,
-          children: [
-            FutureBuilder<Map<String, String>>(
+        body: OrientationBuilder(
+          builder: (context, orientation) {
+            bool isPortrait = orientation == Orientation.portrait;
+            if (_isPortrait != isPortrait) {
+              _isPortrait = isPortrait;
+              _orientationChanging = true;
+              _pdfViewController = null; // Reset controller to force rebuild
+            }
+
+            return FutureBuilder<Map<String, String>>(
               future: pdfPathsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -123,90 +118,112 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                     child: Text('Error loading PDF: ${snapshot.error}'),
                   );
                 } else {
-                  final String pdfPath = _isPortrait
+                  final String pdfPath = isPortrait
                       ? snapshot.data!['portrait']!
                       : snapshot.data!['landscape']!;
                   print('Displaying PDF: $pdfPath');
 
-                  return PDFView(
-                    key: ValueKey(pdfPath), // Force reload by changing key
-                    filePath: pdfPath,
-                    swipeHorizontal: true,
-                    fitPolicy: FitPolicy.BOTH,
-                    onRender: (pages) {
-                      setState(() {
-                        _totalPages = pages!;
-                        // Restore the current page after rendering
-                        if (_orientationChanging) {
-                          _pdfViewController?.setPage(_isPortrait
-                              ? (_currentPage * 2).toInt()
-                              : (_currentPage / 2).toInt());
-                        } else {
-                          _pdfViewController
-                              ?.setPage((_currentPage / 2).toInt());
-                        }
-                        _orientationChanging = false; // Reset the flag
-                        _resetScrollbarTimer();
-                      });
-                    },
-                    onViewCreated: (PDFViewController controller) {
-                      _pdfViewController = controller;
-                      // Restore the current page when view is created
-                      _pdfViewController?.setPage(_currentPage);
-                      _resetScrollbarTimer();
-                    },
-                    onPageChanged: (page, total) {
-                      if (_orientationChanging) {
-                        return; // Skip updating if orientation is changing
-                      }
-                      setState(() {
-                        _currentPage = page!;
-                        //_resetScrollbarTimer();
-                      });
-                    },
-                    onError: (error) {
-                      print('PDF loading error: $error');
-                    },
-                    onPageError: (page, error) {
-                      print('Error on page $page: $error');
-                    },
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      PDFView(
+                        key: ValueKey(pdfPath), // Force reload by changing key
+                        filePath: pdfPath,
+                        swipeHorizontal: true,
+                        fitPolicy: FitPolicy.BOTH,
+                        onRender: (pages) {
+                          setState(() {
+                            _totalPages = pages!;
+                            // Restore the current page after rendering
+                            if (_orientationChanging) {
+                              _pdfViewController?.setPage(_isPortrait
+                                  ? (_currentPage * 2).toInt()
+                                  : (_currentPage / 2).toInt());
+                            } else {
+                              _pdfViewController
+                                  ?.setPage((_currentPage / 2).toInt());
+                            }
+                            _orientationChanging = false; // Reset the flag
+                          });
+                          print(
+                              'onRender: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
+                        },
+                        onViewCreated: (PDFViewController controller) {
+                          _pdfViewController = controller;
+                          // Restore the current page when view is created
+                          _pdfViewController?.setPage(_currentPage);
+                          print(
+                              'onViewCreated: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
+                        },
+                        onPageChanged: (page, total) {
+                          if (_orientationChanging) {
+                            return; // Skip updating if orientation is changing
+                          }
+                          setState(() {
+                            print(
+                                'onPageChanged: Current page changing from $_currentPage');
+                            _currentPage = page!;
+                            print(
+                                'onPageChanged: Current page changed to $_currentPage');
+                          });
+                          print(
+                              'onPageChanged: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
+                        },
+                        onError: (error) {
+                          print('PDF loading error: $error');
+                        },
+                        onPageError: (page, error) {
+                          print('Error on page $page: $error');
+                        },
+                      ),
+                      if (_totalPages > 0 && _isScrollbarVisible)
+                        Positioned(
+                          bottom: 10,
+                          left: 10,
+                          right: 10,
+                          child: Row(
+                            children: [
+                              Text(
+                                '${MediaQuery.of(context).orientation == Orientation.landscape ? ((_totalPages - _currentPage) * 2 - 1) : (_totalPages - _currentPage)}/${MediaQuery.of(context).orientation == Orientation.landscape ? (_totalPages * 2 - 1) : _totalPages}',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              Expanded(
+                                child: Slider(
+                                  value: _currentPage.toDouble(),
+                                  min: 0,
+                                  max: (_totalPages - 1).toDouble(),
+                                  onChanged: (value) async {
+                                    final int pageNumber = value.toInt();
+                                    await _pdfViewController
+                                        ?.setPage(pageNumber);
+                                    setState(() {
+                                      _currentPage = pageNumber;
+                                      print(
+                                          'Slider onChanged: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      GestureDetector(
+                        behavior: HitTestBehavior
+                            .translucent, //to listen for tap events on an empty container
+
+                        onTap: _onScreenTap,
+
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                        ),
+                      )
+                    ],
                   );
                 }
               },
-            ),
-            if (_isScrollbarVisible &&
-                (_totalPages > 0)) // Show the scrollbar if visible
-              Positioned(
-                bottom: 10,
-                left: 10,
-                right: 10,
-                child: Row(
-                  children: [
-                    Text(
-                      '${MediaQuery.of(context).orientation == Orientation.landscape ? ((_totalPages - _currentPage) * 2 - 1) : (_totalPages - _currentPage)}/${MediaQuery.of(context).orientation == Orientation.landscape ? (_totalPages * 2 - 1) : _totalPages}',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    Expanded(
-                      child: Slider(
-                        value: _currentPage.toDouble(),
-                        min: 0,
-                        max: (_totalPages - 1).toDouble(),
-                        onChanged: (value) async {
-                          final int pageNumber = value.toInt();
-                          await _pdfViewController?.setPage(pageNumber);
-                          setState(() {
-                            _currentPage = pageNumber;
-                            _resetScrollbarTimer();
-                            print(
-                                'Slider onChanged: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+            );
+          },
         ),
       ),
     );
