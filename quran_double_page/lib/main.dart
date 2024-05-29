@@ -106,8 +106,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                           _totalPages = pages!;
                           // Restore the current page after rendering
                           if (_orientationChanging) {
-                            // _pdfViewController
-                            //     ?.setPage((_currentPage / 2).toInt());
                             _pdfViewController?.setPage(_isPortrait
                                 ? (_currentPage * 2).toInt()
                                 : (_currentPage / 2).toInt());
@@ -116,9 +114,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 ?.setPage((_currentPage / 2).toInt());
                           }
                           _orientationChanging = false; // Reset the flag
-                          // _pdfViewController
-                          //     ?.setPage((_currentPage / 2).toInt());
-                          // _orientationChanging = false; // Reset the flag
                         });
                         print(
                             'onRender: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
