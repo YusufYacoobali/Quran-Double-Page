@@ -142,29 +142,19 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                           }
                           _orientationChanging = false; // Reset the flag
                         });
-                        print(
-                            'onRender: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                       },
                       onViewCreated: (PDFViewController controller) {
                         _pdfViewController = controller;
                         // Restore the current page when view is created
                         _pdfViewController?.setPage(_currentPage);
-                        print(
-                            'onViewCreated: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                       },
                       onPageChanged: (page, total) {
                         if (_orientationChanging) {
                           return; // Skip updating if orientation is changing
                         }
                         setState(() {
-                          print(
-                              'onPageChanged: Current page changing from $_currentPage');
                           _currentPage = page!;
-                          print(
-                              'onPageChanged: Current page changed to $_currentPage');
                         });
-                        print(
-                            'onPageChanged: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                       },
                       onError: (error) {
                         print('PDF loading error: $error');
@@ -192,10 +182,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 onChanged: (value) async {
                                   final int pageNumber = value.toInt();
                                   await _pdfViewController?.setPage(pageNumber);
+
                                   setState(() {
                                     _currentPage = pageNumber;
-                                    print(
-                                        'Slider onChanged: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                                   });
                                 },
                               ),
