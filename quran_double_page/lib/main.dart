@@ -33,6 +33,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   int _totalPages = 0;
   int _currentPage = 0;
   bool _isPortrait = true;
+  bool _orientationChanging = false;
 
   @override
   void initState() {
@@ -71,6 +72,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
           bool isPortrait = orientation == Orientation.portrait;
           if (_isPortrait != isPortrait) {
             _isPortrait = isPortrait;
+            _orientationChanging = true;
             _pdfViewController = null; // Reset controller to force rebuild
           }
 
@@ -104,17 +106,30 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                           _totalPages = pages!;
                           // Restore the current page after rendering
                           _pdfViewController?.setPage(_currentPage);
+                          _orientationChanging = false; // Reset the flag
                         });
+                        print(
+                            'onRender: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                       },
                       onViewCreated: (PDFViewController controller) {
                         _pdfViewController = controller;
                         // Restore the current page when view is created
                         _pdfViewController?.setPage(_currentPage);
+                        print(
+                            'onViewCreated: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                       },
                       onPageChanged: (page, total) {
+                        if (_orientationChanging)
+                          return; // Skip updating if orientation is changing
                         setState(() {
+                          print(
+                              'onPageChanged: Current page changing from $_currentPage');
                           _currentPage = page!;
+                          print(
+                              'onPageChanged: Current page changed to $_currentPage');
                         });
+                        print(
+                            'onPageChanged: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                       },
                       onError: (error) {
                         print('PDF loading error: $error');
@@ -144,6 +159,8 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                   await _pdfViewController?.setPage(pageNumber);
                                   setState(() {
                                     _currentPage = pageNumber;
+                                    print(
+                                        'Slider onChanged: Orientation: ${_isPortrait ? 'Portrait' : 'Landscape'}, Current Page: $_currentPage');
                                   });
                                 },
                               ),
