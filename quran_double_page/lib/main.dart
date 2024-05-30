@@ -193,9 +193,49 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                             IconButton(
                               icon: const Icon(Icons.bookmarks_outlined),
                               onPressed: () {
-                                // Add bookmark functionality here
-                                print(
-                                    'Bookmark icon pressed for page $_currentPage');
+                                showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      width: double
+                                          .infinity, // Width of container occupies full width of screen
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.5, // Fixed height
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .stretch, // Align children to stretch horizontally
+                                        children: [
+                                          // Add your bookmark button and other widgets here
+                                          SizedBox(
+                                            height:
+                                                50, // Adjust the height as needed
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                // Add bookmark functionality here
+                                                print(
+                                                    'Bookmark button pressed');
+                                              },
+                                              child: Text('Bookmark This Page'),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                50, // Adjust the height as needed
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                // View all bookmarks functionality here
+                                                print(
+                                                    'View All Bookmarks button pressed');
+                                              },
+                                              child: Text('View All Bookmarks'),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
                               },
                             ),
                             IconButton(
