@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quran_double_page/settings.dart';
 
 void main() {
   runApp(MyApp());
@@ -189,16 +190,39 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 },
                               ),
                             ),
+                            IconButton(
+                              icon: const Icon(Icons.bookmarks_outlined),
+                              onPressed: () {
+                                // Add bookmark functionality here
+                                print(
+                                    'Bookmark icon pressed for page $_currentPage');
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.settings_outlined),
+                              onPressed: () {
+                                // Navigate to the SettingsScreen when the settings icon is pressed
+                                print('Settings tapped');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Settings()),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
-                    GestureDetector(
-                      behavior: HitTestBehavior
-                          .translucent, //to listen for tap events on an empty container
-                      onTap: _onScreenTap,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 35),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior
+                            .translucent, // to listen for tap events on an empty container
+                        onTap: _onScreenTap,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                        ),
                       ),
                     )
                   ],
