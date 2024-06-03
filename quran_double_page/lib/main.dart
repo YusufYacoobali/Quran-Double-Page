@@ -266,6 +266,21 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                                         setModalState(
                                                             () {}); // Update modal state
                                                       },
+                                                      onPagePressed:
+                                                          (bookmark) async {
+                                                        final int pageNumber =
+                                                            _totalPages -
+                                                                bookmark
+                                                                    .pageNumber; // Get the page number from the bookmark
+                                                        await _pdfViewController
+                                                            ?.setPage(
+                                                                pageNumber);
+
+                                                        setState(() {
+                                                          _currentPage =
+                                                              pageNumber;
+                                                        });
+                                                      },
                                                     );
                                                   },
                                                 ),
