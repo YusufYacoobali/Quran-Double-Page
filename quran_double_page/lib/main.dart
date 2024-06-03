@@ -43,10 +43,17 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   final List<Bookmark> _bookmarks = [];
 
   void _addBookmark() {
+    int pageNumber = _totalPages - _currentPage;
+    // Check if the page number is already bookmarked
+    if (_bookmarks.any((bookmark) => bookmark.pageNumber == pageNumber)) {
+      // If the page number is already bookmarked, do nothing
+      return;
+    }
+
+    // If the page number is not bookmarked, add it to the list of bookmarks
     setState(() {
-      int _pagenum = _totalPages - _currentPage;
       _bookmarks.add(Bookmark(
-        pageNumber: _pagenum,
+        pageNumber: pageNumber,
         // surah: 'Description for page $_pagenum',
       ));
     });
@@ -240,7 +247,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                                     setModalState(
                                                         () {}); // Update modal state
                                                   },
-                                                  child: Text(
+                                                  child: const Text(
                                                       'Bookmark This Page'),
                                                 ),
                                               ),
@@ -253,9 +260,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                                       bookmark:
                                                           _bookmarks[index],
                                                       onBookmarkToggled:
-                                                          (Bookmark) {
+                                                          (bookmark) {
                                                         _handleBookmarkToggled(
-                                                            Bookmark);
+                                                            bookmark);
                                                         setModalState(
                                                             () {}); // Update modal state
                                                       },
