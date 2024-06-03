@@ -43,7 +43,11 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   final List<Bookmark> _bookmarks = [];
 
   void _addBookmark() {
-    int pageNumber = _totalPages - _currentPage;
+    int pageNumber = _isPortrait
+        ? (_totalPages - _currentPage)
+        : (_totalPages - _currentPage) * 2 - 1;
+
+    //int pageNumber = _totalPages - _currentPage;
     // Check if the page number is already bookmarked
     if (_bookmarks.any((bookmark) => bookmark.pageNumber == pageNumber)) {
       // If the page number is already bookmarked, do nothing
@@ -268,10 +272,18 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                                       },
                                                       onPagePressed:
                                                           (bookmark) async {
-                                                        final int pageNumber =
-                                                            _totalPages -
+                                                        int pageNumber = _isPortrait
+                                                            ? (_totalPages -
                                                                 bookmark
-                                                                    .pageNumber; // Get the page number from the bookmark
+                                                                    .pageNumber)
+                                                            : (851 -
+                                                                    bookmark
+                                                                        .pageNumber) ~/
+                                                                2;
+                                                        // final int pageNumber =
+                                                        //     _totalPages -
+                                                        //         bookmark
+                                                        //             .pageNumber; // Get the page number from the bookmark
                                                         await _pdfViewController
                                                             ?.setPage(
                                                                 pageNumber);
