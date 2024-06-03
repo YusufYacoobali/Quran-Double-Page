@@ -233,11 +233,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                       builder: (BuildContext context,
                                           StateSetter setModalState) {
                                         return Container(
+                                          //width: double.infinity,
                                           width: double.infinity,
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.5,
+
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.stretch,
