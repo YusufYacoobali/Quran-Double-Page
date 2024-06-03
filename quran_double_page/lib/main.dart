@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quran_double_page/bookmark.dart';
+import 'package:quran_double_page/model/bookmark.dart';
 import 'package:quran_double_page/settings.dart';
 
 void main() {
@@ -38,6 +40,17 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   bool _orientationChanging = false;
   bool _isScrollbarVisible = true; // State for scrollbar visibility
   Timer? _hideScrollbarTimer; // Timer to hide the scrollbar
+  final List<Bookmark> _bookmarks = [];
+
+  void _addBookmark() {
+    setState(() {
+      int _pagenum = _totalPages - _currentPage;
+      _bookmarks.add(Bookmark(
+        pageNumber: _pagenum,
+        // surah: 'Description for page $_pagenum',
+      ));
+    });
+  }
 
   @override
   void initState() {
@@ -196,43 +209,56 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return Container(
-                                      width: double
-                                          .infinity, // Width of container occupies full width of screen
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.5, // Fixed height
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment
-                                            .stretch, // Align children to stretch horizontally
-                                        children: [
-                                          // Add your bookmark button and other widgets here
-                                          SizedBox(
-                                            height:
-                                                50, // Adjust the height as needed
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                // Add bookmark functionality here
-                                                print(
-                                                    'Bookmark button pressed');
-                                              },
-                                              child: Text('Bookmark This Page'),
-                                            ),
+                                    return StatefulBuilder(
+                                      builder: (BuildContext context,
+                                          StateSetter setModalState) {
+                                        return Container(
+                                          width: double.infinity,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.5,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              SizedBox(
+                                                height: 50,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    _addBookmark();
+                                                    setModalState(
+                                                        () {}); // Update modal state
+                                                  },
+                                                  child: Text(
+                                                      'Bookmark This Page'),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 50,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    // View all bookmarks functionality here
+                                                  },
+                                                  child: Text(
+                                                      'View All Bookmarks'),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: ListView.builder(
+                                                  itemCount: _bookmarks.length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    return BookmarkWidget(
+                                                        bookmark:
+                                                            _bookmarks[index]);
+                                                  },
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          SizedBox(
-                                            height:
-                                                50, // Adjust the height as needed
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                // View all bookmarks functionality here
-                                                print(
-                                                    'View All Bookmarks button pressed');
-                                              },
-                                              child: Text('View All Bookmarks'),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        );
+                                      },
                                     );
                                   },
                                 );
