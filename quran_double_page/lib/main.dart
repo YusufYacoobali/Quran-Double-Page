@@ -52,6 +52,16 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     });
   }
 
+  void _handleBookmarkToggled(Bookmark bookmark) {
+    setState(() {
+      if (_bookmarks.contains(bookmark)) {
+        _bookmarks.remove(bookmark);
+      } else {
+        _bookmarks.add(bookmark);
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -234,24 +244,22 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                                       'Bookmark This Page'),
                                                 ),
                                               ),
-                                              SizedBox(
-                                                height: 50,
-                                                child: ElevatedButton(
-                                                  onPressed: () {
-                                                    // View all bookmarks functionality here
-                                                  },
-                                                  child: Text(
-                                                      'View All Bookmarks'),
-                                                ),
-                                              ),
                                               Expanded(
                                                 child: ListView.builder(
                                                   itemCount: _bookmarks.length,
                                                   itemBuilder:
                                                       (context, index) {
                                                     return BookmarkWidget(
-                                                        bookmark:
-                                                            _bookmarks[index]);
+                                                      bookmark:
+                                                          _bookmarks[index],
+                                                      onBookmarkToggled:
+                                                          (Bookmark) {
+                                                        _handleBookmarkToggled(
+                                                            Bookmark);
+                                                        setModalState(
+                                                            () {}); // Update modal state
+                                                      },
+                                                    );
                                                   },
                                                 ),
                                               ),
