@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:quran_double_page/bookmark.dart';
 import 'package:quran_double_page/model/bookmark.dart';
 import 'package:quran_double_page/settings.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -78,6 +77,15 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     BookmarkManager.saveBookmarks(_bookmarks);
   }
 
+  void _loadCurrentPage() async {
+    final int savedPage = await BookmarkManager.getCurrentPage();
+    print('loading PAGE WAS $savedPage, cur page was $_currentPage');
+    setState(() {
+      _currentPage = savedPage;
+    });
+    print('current page is now $_currentPage');
+  }
+
   // Load bookmarks from SharedPreferences
   void _loadBookmarks() async {
     final List<Bookmark> bookmarks = await BookmarkManager.getBookmarks();
@@ -94,6 +102,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _startHideScrollbarTimer(); // Start the timer when the widget initializes
     _loadBookmarks();
+    _loadCurrentPage();
   }
 
   @override
@@ -179,6 +188,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                       swipeHorizontal: true,
                       fitPolicy: FitPolicy.BOTH,
                       onRender: (pages) {
+                        print('onrender current page is now $_currentPage');
                         setState(() {
                           _totalPages = pages!;
                           // Restore the current page after rendering
@@ -187,23 +197,32 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 ? (_currentPage * 2).toInt()
                                 : _currentPage ~/ 2);
                           } else {
-                            _pdfViewController?.setPage(_currentPage ~/ 2);
+                            _pdfViewController?.setPage(_currentPage);
                           }
                           _orientationChanging = false; // Reset the flag
                         });
+                        print('onrender current page is now $_currentPage');
                       },
                       onViewCreated: (PDFViewController controller) {
+                        print('onview current page is now $_currentPage');
                         _pdfViewController = controller;
                         // Restore the current page when view is created
                         _pdfViewController?.setPage(_currentPage);
+                        print('onview current page is now $_currentPage');
                       },
                       onPageChanged: (page, total) {
+                        print('onpage current page is now $_currentPage');
                         if (_orientationChanging) {
                           return; // Skip updating if orientation is changing
                         }
-                        setState(() {
-                          _currentPage = page!;
-                        });
+                        if (page != 0) {
+                          setState(() {
+                            _currentPage = page!;
+                            BookmarkManager.saveCurrentPage(page);
+                          });
+                        }
+
+                        print('onpage current page is now $_currentPage');
                       },
                       onError: (error) {
                         print('PDF loading error: $error');
@@ -323,7 +342,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => Settings()),
+                                      builder: (context) => const Settings()),
                                 );
                               },
                             ),
@@ -350,33 +369,5 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
         },
       ),
     );
-  }
-}
-
-class BookmarkManager {
-  static const _kBookmarkKey = 'bookmarks1';
-
-  // Save bookmarks to SharedPreferences
-  static Future<void> saveBookmarks(List<Bookmark> bookmarks) async {
-    print('trying to save bookmark 2');
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> bookmarkPageNumbers =
-        bookmarks.map((bookmark) => bookmark.pageNumber.toString()).toList();
-    print('SAVING BOOKMARKS: $bookmarkPageNumbers');
-    await prefs.setStringList(_kBookmarkKey, bookmarkPageNumbers);
-  }
-
-// Retrieve bookmarks from SharedPreferences
-  static Future<List<Bookmark>> getBookmarks() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String>? bookmarkPageNumbers =
-        prefs.getStringList(_kBookmarkKey);
-    if (bookmarkPageNumbers == null) {
-      return [];
-    }
-    print('RETRIEVING BOOKMARKS: $bookmarkPageNumbers');
-    return bookmarkPageNumbers
-        .map((pageNumber) => Bookmark(pageNumber: int.parse(pageNumber)))
-        .toList();
   }
 }
