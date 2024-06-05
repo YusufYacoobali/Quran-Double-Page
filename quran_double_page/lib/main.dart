@@ -185,10 +185,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                           if (_orientationChanging) {
                             _pdfViewController?.setPage(_isPortrait
                                 ? (_currentPage * 2).toInt()
-                                : (_currentPage / 2).toInt());
+                                : _currentPage ~/ 2);
                           } else {
-                            _pdfViewController
-                                ?.setPage((_currentPage / 2).toInt());
+                            _pdfViewController?.setPage(_currentPage ~/ 2);
                           }
                           _orientationChanging = false; // Reset the flag
                         });
