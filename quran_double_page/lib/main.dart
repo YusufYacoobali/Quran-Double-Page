@@ -78,8 +78,11 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   }
 
   void _loadCurrentPage() async {
-    final int savedPage = await BookmarkManager.getCurrentPage();
+    int savedPage = await BookmarkManager.getCurrentPage();
     print('loading PAGE WAS $savedPage, cur page was $_currentPage');
+    // if (!_isPortrait) {
+    //   savedPage = savedPage ~/ 2;
+    // }
     setState(() {
       _currentPage = savedPage;
     });
@@ -218,7 +221,11 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                         if (page != 0) {
                           setState(() {
                             _currentPage = page!;
-                            BookmarkManager.saveCurrentPage(page);
+                            if (isPortrait) {
+                              BookmarkManager.saveCurrentPage(page);
+                            } else {
+                              BookmarkManager.saveCurrentPage(page * 2 + 1);
+                            }
                           });
                         }
 
