@@ -4,6 +4,20 @@ class Bookmark {
 
   Bookmark({required this.pageNumber}) : surah = _getSurahName(pageNumber);
 
+  // Serialize Bookmark object to a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'pageNumber': pageNumber,
+    };
+  }
+
+  // Deserialize Map to a Bookmark object
+  factory Bookmark.fromMap(Map<String, dynamic> map) {
+    return Bookmark(
+      pageNumber: map['pageNumber'],
+    );
+  }
+
   static String _getSurahName(int pageNumber) {
     if (pageNumber >= 0 && pageNumber <= 3) return "Start";
     if (pageNumber == 4) return "Al-Fatiha";

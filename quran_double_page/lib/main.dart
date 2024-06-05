@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:quran_double_page/bookmark.dart';
 import 'package:quran_double_page/model/bookmark.dart';
 import 'package:quran_double_page/settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -60,6 +62,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
         // surah: 'Description for page $_pagenum',
       ));
     });
+    // Save the updated list of bookmarks to storage
+    print('trying to save bookmark 1');
+    BookmarkManager.saveBookmarks(_bookmarks);
   }
 
   void _handleBookmarkToggled(Bookmark bookmark) {
@@ -72,12 +77,22 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     });
   }
 
+  // Load bookmarks from SharedPreferences
+  void _loadBookmarks() async {
+    final List<Bookmark> bookmarks = await BookmarkManager.getBookmarks();
+    print(' all bookmarks gotten:  $bookmarks');
+    setState(() {
+      _bookmarks.addAll(bookmarks);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     pdfPathsFuture = loadPDFFromAssets();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _startHideScrollbarTimer(); // Start the timer when the widget initializes
+    _loadBookmarks();
   }
 
   @override
@@ -335,5 +350,33 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
         },
       ),
     );
+  }
+}
+
+class BookmarkManager {
+  static const _kBookmarkKey = 'bookmarks1';
+
+  // Save bookmarks to SharedPreferences
+  static Future<void> saveBookmarks(List<Bookmark> bookmarks) async {
+    print('trying to save bookmark 2');
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> bookmarkPageNumbers =
+        bookmarks.map((bookmark) => bookmark.pageNumber.toString()).toList();
+    print('SAVING BOOKMARKS: $bookmarkPageNumbers');
+    await prefs.setStringList(_kBookmarkKey, bookmarkPageNumbers);
+  }
+
+// Retrieve bookmarks from SharedPreferences
+  static Future<List<Bookmark>> getBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? bookmarkPageNumbers =
+        prefs.getStringList(_kBookmarkKey);
+    if (bookmarkPageNumbers == null) {
+      return [];
+    }
+    print('RETRIEVING BOOKMARKS: $bookmarkPageNumbers');
+    return bookmarkPageNumbers
+        .map((pageNumber) => Bookmark(pageNumber: int.parse(pageNumber)))
+        .toList();
   }
 }
