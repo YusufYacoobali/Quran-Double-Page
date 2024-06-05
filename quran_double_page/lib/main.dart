@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,10 +10,12 @@ import 'package:quran_double_page/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,12 +24,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyPDFViewer(),
+      home: const MyPDFViewer(),
     );
   }
 }
 
 class MyPDFViewer extends StatefulWidget {
+  const MyPDFViewer({super.key});
+
   @override
   _MyPDFViewerState createState() => _MyPDFViewerState();
 }
@@ -101,7 +104,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
 
   void _startHideScrollbarTimer() {
     _hideScrollbarTimer?.cancel(); // Cancel any existing timer
-    _hideScrollbarTimer = Timer(Duration(seconds: 4), () {
+    _hideScrollbarTimer = Timer(const Duration(seconds: 4), () {
       setState(() {
         _isScrollbarVisible = false;
       });
@@ -219,7 +222,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                           children: [
                             Text(
                               '${MediaQuery.of(context).orientation == Orientation.landscape ? ((_totalPages - _currentPage) * 2 - 1) : (_totalPages - _currentPage)}/${MediaQuery.of(context).orientation == Orientation.landscape ? (_totalPages * 2 - 1) : _totalPages}',
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                             Expanded(
                               child: Slider(

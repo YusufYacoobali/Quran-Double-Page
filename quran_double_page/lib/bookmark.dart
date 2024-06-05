@@ -6,7 +6,8 @@ class BookmarkWidget extends StatefulWidget {
   final Function(Bookmark) onBookmarkToggled;
   final Function(Bookmark) onPagePressed; // Callback function for page press
 
-  BookmarkWidget({
+  const BookmarkWidget({
+    super.key,
     required this.bookmark,
     required this.onBookmarkToggled,
     required this.onPagePressed,
