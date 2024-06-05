@@ -63,7 +63,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
       ));
     });
     // Save the updated list of bookmarks to storage
-    print('trying to save bookmark 1');
     BookmarkManager.saveBookmarks(_bookmarks);
   }
 
@@ -71,10 +70,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     setState(() {
       if (_bookmarks.contains(bookmark)) {
         _bookmarks.remove(bookmark);
-      } else {
-        _bookmarks.add(bookmark);
       }
     });
+    BookmarkManager.saveBookmarks(_bookmarks);
   }
 
   // Load bookmarks from SharedPreferences
