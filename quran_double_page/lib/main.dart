@@ -133,12 +133,13 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
 
   Future<Map<String, String>> loadPDFFromAssets() async {
     final ByteData dataPortrait =
-        await rootBundle.load('assets/quran_source_v.pdf');
+        await rootBundle.load('assets/quran_source_v_l_s.pdf');
     final ByteData dataLandscape =
         await rootBundle.load('assets/quran_source_double_close.pdf');
     final Directory tempDir = await getTemporaryDirectory();
 
-    final File tempFilePortrait = File('${tempDir.path}/quran_source_v.pdf');
+    final File tempFilePortrait =
+        File('${tempDir.path}/quran_source_v_l_s.pdf');
     await tempFilePortrait.writeAsBytes(dataPortrait.buffer.asUint8List(),
         flush: true);
 
