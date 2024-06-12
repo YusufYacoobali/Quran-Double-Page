@@ -103,11 +103,14 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   @override
   void initState() {
     super.initState();
+
     pdfPathsFuture = loadPDFFromAssets();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _startHideScrollbarTimer(); // Start the timer when the widget initializes
     _loadBookmarks();
     _loadCurrentPage();
+    _loadSelectedPDF();
+    print('at the end $selectedPortraitPDF is pdf');
   }
 
   @override
@@ -133,6 +136,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   }
 
   Future<Map<String, String>> loadPDFFromAssets() async {
+    print('loading asset $selectedPortraitPDF is pdf');
     final ByteData dataPortrait =
         await rootBundle.load('assets/$selectedPortraitPDF');
     final ByteData dataLandscape =
@@ -152,6 +156,16 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
       'portrait': tempFilePortrait.path,
       'landscape': tempFileLandscape.path,
     };
+  }
+
+  Future<void> _loadSelectedPDF() async {
+    bool isOptimizedPortrait = await StorageManager.getOptimizedPortrait();
+    setState(() {
+      selectedPortraitPDF =
+          isOptimizedPortrait ? 'quran_source_v_l_s.pdf' : 'quran_source_v.pdf';
+      print('load selected $selectedPortraitPDF is pdf');
+      pdfPathsFuture = loadPDFFromAssets(); // Reload PDF paths
+    });
   }
 
   @override
