@@ -6,6 +6,7 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_double_page/bookmark.dart';
 import 'package:quran_double_page/model/bookmark.dart';
+import 'package:quran_double_page/model/storage.dart';
 import 'package:quran_double_page/settings.dart';
 
 void main() {
@@ -45,6 +46,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   bool _isScrollbarVisible = true; // State for scrollbar visibility
   Timer? _hideScrollbarTimer; // Timer to hide the scrollbar
   final List<Bookmark> _bookmarks = [];
+  String selectedPortraitPDF = 'quran_source_v_l_s.pdf';
 
   void _addBookmark() {
     int pageNumber = _isPortrait
@@ -65,7 +67,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
       ));
     });
     // Save the updated list of bookmarks to storage
-    BookmarkManager.saveBookmarks(_bookmarks);
+    StorageManager.saveBookmarks(_bookmarks);
   }
 
   void _handleBookmarkToggled(Bookmark bookmark) {
@@ -74,11 +76,11 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
         _bookmarks.remove(bookmark);
       }
     });
-    BookmarkManager.saveBookmarks(_bookmarks);
+    StorageManager.saveBookmarks(_bookmarks);
   }
 
   void _loadCurrentPage() async {
-    int savedPage = await BookmarkManager.getCurrentPage();
+    int savedPage = await StorageManager.getCurrentPage();
     print('loading PAGE WAS $savedPage, cur page was $_currentPage');
     // if (!_isPortrait) {
     //   savedPage = savedPage ~/ 2;
@@ -91,7 +93,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
 
   // Load bookmarks from SharedPreferences
   void _loadBookmarks() async {
-    final List<Bookmark> bookmarks = await BookmarkManager.getBookmarks();
+    final List<Bookmark> bookmarks = await StorageManager.getBookmarks();
     print(' all bookmarks gotten:  $bookmarks');
     setState(() {
       _bookmarks.addAll(bookmarks);
@@ -124,7 +126,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   }
 
   void _onScreenTap() {
-    print('screen tapped');
     setState(() {
       _isScrollbarVisible = true;
     });
@@ -133,13 +134,12 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
 
   Future<Map<String, String>> loadPDFFromAssets() async {
     final ByteData dataPortrait =
-        await rootBundle.load('assets/quran_source_v_l_s.pdf');
+        await rootBundle.load('assets/$selectedPortraitPDF');
     final ByteData dataLandscape =
         await rootBundle.load('assets/quran_source_double_close.pdf');
     final Directory tempDir = await getTemporaryDirectory();
 
-    final File tempFilePortrait =
-        File('${tempDir.path}/quran_source_v_l_s.pdf');
+    final File tempFilePortrait = File('${tempDir.path}/$selectedPortraitPDF');
     await tempFilePortrait.writeAsBytes(dataPortrait.buffer.asUint8List(),
         flush: true);
 
@@ -223,9 +223,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                           setState(() {
                             _currentPage = page!;
                             if (isPortrait) {
-                              BookmarkManager.saveCurrentPage(page);
+                              StorageManager.saveCurrentPage(page);
                             } else {
-                              BookmarkManager.saveCurrentPage(page * 2 + 1);
+                              StorageManager.saveCurrentPage(page * 2 + 1);
                             }
                           });
                         }

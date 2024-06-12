@@ -1,5 +1,3 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
 class Bookmark {
   final int pageNumber;
   final String surah;
@@ -237,46 +235,46 @@ class Bookmark {
 //         851 -> "Dua"
 //         else -> "Surah"
 
-class BookmarkManager {
-  static const _kCurrentPageKey = 'CurrentPage1';
-  static const _kBookmarkKey = 'bookmarks1';
+// class BookmarkManager {
+//   static const _kCurrentPageKey = 'CurrentPage1';
+//   static const _kBookmarkKey = 'bookmarks1';
 
-  // Save current page to SharedPreferences
-  static Future<void> saveCurrentPage(int page) async {
-    if (page != 0 && page != 851) {
-      final prefs = await SharedPreferences.getInstance();
-      print('saving current page $page');
-      await prefs.setInt(_kCurrentPageKey, page);
-    }
-  }
+//   // Save current page to SharedPreferences
+//   static Future<void> saveCurrentPage(int page) async {
+//     if (page != 0 && page != 851) {
+//       final prefs = await SharedPreferences.getInstance();
+//       print('saving current page $page');
+//       await prefs.setInt(_kCurrentPageKey, page);
+//     }
+//   }
 
-  // Retrieve current page from SharedPreferences
-  static Future<int> getCurrentPage() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_kCurrentPageKey) ?? 0;
-  }
+//   // Retrieve current page from SharedPreferences
+//   static Future<int> getCurrentPage() async {
+//     final prefs = await SharedPreferences.getInstance();
+//     return prefs.getInt(_kCurrentPageKey) ?? 0;
+//   }
 
-  // Save bookmarks to SharedPreferences
-  static Future<void> saveBookmarks(List<Bookmark> bookmarks) async {
-    print('trying to save bookmark 2');
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> bookmarkPageNumbers =
-        bookmarks.map((bookmark) => bookmark.pageNumber.toString()).toList();
-    print('SAVING BOOKMARKS: $bookmarkPageNumbers');
-    await prefs.setStringList(_kBookmarkKey, bookmarkPageNumbers);
-  }
+//   // Save bookmarks to SharedPreferences
+//   static Future<void> saveBookmarks(List<Bookmark> bookmarks) async {
+//     print('trying to save bookmark 2');
+//     final prefs = await SharedPreferences.getInstance();
+//     final List<String> bookmarkPageNumbers =
+//         bookmarks.map((bookmark) => bookmark.pageNumber.toString()).toList();
+//     print('SAVING BOOKMARKS: $bookmarkPageNumbers');
+//     await prefs.setStringList(_kBookmarkKey, bookmarkPageNumbers);
+//   }
 
-// Retrieve bookmarks from SharedPreferences
-  static Future<List<Bookmark>> getBookmarks() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String>? bookmarkPageNumbers =
-        prefs.getStringList(_kBookmarkKey);
-    if (bookmarkPageNumbers == null) {
-      return [];
-    }
-    print('RETRIEVING BOOKMARKS: $bookmarkPageNumbers');
-    return bookmarkPageNumbers
-        .map((pageNumber) => Bookmark(pageNumber: int.parse(pageNumber)))
-        .toList();
-  }
-}
+// // Retrieve bookmarks from SharedPreferences
+//   static Future<List<Bookmark>> getBookmarks() async {
+//     final prefs = await SharedPreferences.getInstance();
+//     final List<String>? bookmarkPageNumbers =
+//         prefs.getStringList(_kBookmarkKey);
+//     if (bookmarkPageNumbers == null) {
+//       return [];
+//     }
+//     print('RETRIEVING BOOKMARKS: $bookmarkPageNumbers');
+//     return bookmarkPageNumbers
+//         .map((pageNumber) => Bookmark(pageNumber: int.parse(pageNumber)))
+//         .toList();
+//   }
+// }
