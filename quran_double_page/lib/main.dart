@@ -272,7 +272,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                               ),
                               Expanded(
                                 child: Slider(
-                                  activeColor: Colors.white,
+                                  activeColor: const Color(0xFF7EA16B),
                                   thumbColor:
                                       const Color.fromARGB(255, 175, 132, 4),
                                   inactiveColor:
@@ -298,29 +298,50 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 ),
                                 onPressed: () {
                                   showModalBottomSheet(
+                                    backgroundColor:
+                                        Color.fromARGB(255, 235, 243, 236),
                                     context: context,
                                     builder: (BuildContext context) {
                                       return StatefulBuilder(
                                         builder: (BuildContext context,
                                             StateSetter setModalState) {
                                           return Container(
-                                            //width: double.infinity,
                                             width: double.infinity,
-
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.stretch,
                                               children: [
-                                                SizedBox(
-                                                  height: 50,
+                                                Container(
+                                                  margin: const EdgeInsets.all(
+                                                      16.0),
                                                   child: ElevatedButton(
                                                     onPressed: () {
                                                       _addBookmark();
                                                       setModalState(
                                                           () {}); // Update modal state
                                                     },
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor: const Color(
+                                                          0xFFFBFBFB), // Background color
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 16.0),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10.0),
+                                                      ),
+                                                    ),
                                                     child: const Text(
-                                                        'Bookmark This Page'),
+                                                      'Bookmark This Page',
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        color:
+                                                            Color(0xFF2A6767),
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                                 Expanded(
