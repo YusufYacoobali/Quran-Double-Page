@@ -258,117 +258,137 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                         bottom: 10,
                         left: 10,
                         right: 10,
-                        child: Row(
-                          children: [
-                            Text(
-                              '${MediaQuery.of(context).orientation == Orientation.landscape ? ((_totalPages - _currentPage) * 2 - 1) : (_totalPages - _currentPage)}/${MediaQuery.of(context).orientation == Orientation.landscape ? (_totalPages * 2 - 1) : _totalPages}',
-                              style: const TextStyle(color: Colors.black),
-                            ),
-                            Expanded(
-                              child: Slider(
-                                value: _currentPage.toDouble(),
-                                min: 0,
-                                max: (_totalPages - 1).toDouble(),
-                                onChanged: (value) async {
-                                  final int pageNumber = value.toInt();
-                                  await _pdfViewController?.setPage(pageNumber);
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 2, 92, 50),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                '${MediaQuery.of(context).orientation == Orientation.landscape ? ((_totalPages - _currentPage) * 2 - 1) : (_totalPages - _currentPage)}/${MediaQuery.of(context).orientation == Orientation.landscape ? (_totalPages * 2 - 1) : _totalPages}',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              Expanded(
+                                child: Slider(
+                                  activeColor: Colors.white,
+                                  thumbColor:
+                                      const Color.fromARGB(255, 175, 132, 4),
+                                  inactiveColor:
+                                      const Color.fromARGB(255, 175, 132, 4),
+                                  value: _currentPage.toDouble(),
+                                  min: 0,
+                                  max: (_totalPages - 1).toDouble(),
+                                  onChanged: (value) async {
+                                    final int pageNumber = value.toInt();
+                                    await _pdfViewController
+                                        ?.setPage(pageNumber);
 
-                                  setState(() {
-                                    _currentPage = pageNumber;
-                                  });
+                                    setState(() {
+                                      _currentPage = pageNumber;
+                                    });
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.bookmarks_outlined,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: (BuildContext context,
+                                            StateSetter setModalState) {
+                                          return Container(
+                                            //width: double.infinity,
+                                            width: double.infinity,
+
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.stretch,
+                                              children: [
+                                                SizedBox(
+                                                  height: 50,
+                                                  child: ElevatedButton(
+                                                    onPressed: () {
+                                                      _addBookmark();
+                                                      setModalState(
+                                                          () {}); // Update modal state
+                                                    },
+                                                    child: const Text(
+                                                        'Bookmark This Page'),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: ListView.builder(
+                                                    itemCount:
+                                                        _bookmarks.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return BookmarkWidget(
+                                                        bookmark:
+                                                            _bookmarks[index],
+                                                        onBookmarkToggled:
+                                                            (bookmark) {
+                                                          _handleBookmarkToggled(
+                                                              bookmark);
+                                                          setModalState(
+                                                              () {}); // Update modal state
+                                                        },
+                                                        onPagePressed:
+                                                            (bookmark) async {
+                                                          int pageNumber = _isPortrait
+                                                              ? (_totalPages -
+                                                                  bookmark
+                                                                      .pageNumber)
+                                                              : (851 -
+                                                                      bookmark
+                                                                          .pageNumber) ~/
+                                                                  2;
+
+                                                          await _pdfViewController
+                                                              ?.setPage(
+                                                                  pageNumber);
+
+                                                          setState(() {
+                                                            _currentPage =
+                                                                pageNumber;
+                                                          });
+                                                        },
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
                                 },
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.bookmarks_outlined),
-                              onPressed: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return StatefulBuilder(
-                                      builder: (BuildContext context,
-                                          StateSetter setModalState) {
-                                        return Container(
-                                          //width: double.infinity,
-                                          width: double.infinity,
-
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              SizedBox(
-                                                height: 50,
-                                                child: ElevatedButton(
-                                                  onPressed: () {
-                                                    _addBookmark();
-                                                    setModalState(
-                                                        () {}); // Update modal state
-                                                  },
-                                                  child: const Text(
-                                                      'Bookmark This Page'),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: ListView.builder(
-                                                  itemCount: _bookmarks.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    return BookmarkWidget(
-                                                      bookmark:
-                                                          _bookmarks[index],
-                                                      onBookmarkToggled:
-                                                          (bookmark) {
-                                                        _handleBookmarkToggled(
-                                                            bookmark);
-                                                        setModalState(
-                                                            () {}); // Update modal state
-                                                      },
-                                                      onPagePressed:
-                                                          (bookmark) async {
-                                                        int pageNumber = _isPortrait
-                                                            ? (_totalPages -
-                                                                bookmark
-                                                                    .pageNumber)
-                                                            : (851 -
-                                                                    bookmark
-                                                                        .pageNumber) ~/
-                                                                2;
-
-                                                        await _pdfViewController
-                                                            ?.setPage(
-                                                                pageNumber);
-
-                                                        setState(() {
-                                                          _currentPage =
-                                                              pageNumber;
-                                                        });
-                                                      },
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.settings_outlined),
-                              onPressed: () {
-                                // Navigate to the SettingsScreen when the settings icon is pressed
-                                print('Settings tapped');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Settings()),
-                                );
-                              },
-                            ),
-                          ],
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.settings_outlined,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  // Navigate to the SettingsScreen when the settings icon is pressed
+                                  print('Settings tapped');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Settings()),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     Padding(
