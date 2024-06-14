@@ -401,10 +401,22 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                 onPressed: () {
                                   // Navigate to the SettingsScreen when the settings icon is pressed
                                   print('Settings tapped');
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //       builder: (context) => const Settings()),
+                                  // );
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const Settings()),
+                                      builder: (context) => Settings(
+                                        onPDFSelectionChanged:
+                                            (isPortraitOptimized) {
+                                          // Reload the PDF viewer with the updated PDF selection
+                                          _loadSelectedPDF();
+                                        },
+                                      ),
+                                    ),
                                   );
                                 },
                               ),
