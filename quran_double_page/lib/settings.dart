@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:quran_double_page/model/storage.dart';
 
 class Settings extends StatefulWidget {
-  final void Function(bool isOptimizedPortrait) onPDFSelectionChanged;
-  final void Function(bool isOptimizedLandscape)
-      onFitPolicyChanged; // Callback for landscape
+  // final void Function(bool isOptimizedPortrait) onPDFSelectionChanged;
+  // final void Function(bool isOptimizedLandscape)
+  //     onFitPolicyChanged; // Callback for landscape
 
-  const Settings(
-      {super.key,
-      required this.onPDFSelectionChanged,
-      required this.onFitPolicyChanged});
+  const Settings({
+    super.key,
+    //required this.onPDFSelectionChanged,
+    // required this.onFitPolicyChanged
+  });
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -36,7 +37,7 @@ class _SettingsState extends State<Settings> {
 
   Future<void> _saveOptimizedPortrait(bool value) async {
     await StorageManager.saveOptimizedPortrait(value);
-    widget.onPDFSelectionChanged(value);
+    //widget.onPDFSelectionChanged(value);
   }
 
   Future<void> _saveOptimizedLandscape(bool value) async {

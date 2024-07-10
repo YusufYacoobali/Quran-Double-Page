@@ -428,15 +428,15 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => Settings(
-                                        onPDFSelectionChanged:
-                                            (isPortraitOptimized) {
-                                          _loadSelectedPDF();
-                                        },
-                                        onFitPolicyChanged:
-                                            (isOptimizedLandscape) {
-                                          _loadFitPolicy();
-                                        },
-                                      ),
+                                          // onPDFSelectionChanged:
+                                          //     (isPortraitOptimized) {
+                                          //   //_loadSelectedPDF();
+                                          // },
+                                          // onFitPolicyChanged:
+                                          //     (isOptimizedLandscape) {
+                                          //   // _loadFitPolicy();
+                                          // },
+                                          ),
                                     ),
                                   ).then((_) {
                                     setState(() {
