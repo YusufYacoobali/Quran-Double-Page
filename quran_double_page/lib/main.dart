@@ -177,9 +177,13 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     print('changing policy $optimizedLandscape');
     setState(() {
       isOptimizedLandscape = optimizedLandscape;
-      fitPolicy =
-          optimizedLandscape && !_isPortrait ? FitPolicy.WIDTH : FitPolicy.BOTH;
+      fitPolicy = isOptimizedLandscape && !_isPortrait
+          ? FitPolicy.WIDTH
+          : FitPolicy.BOTH;
       print('policy os $fitPolicy');
+      //
+      _pdfViewController = null; // Reset contro
+      // pdfPathsFuture = loadPDFFromAssets(); // Reload PDF paths
     });
   }
 
@@ -416,23 +420,16 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                               IconButton(
                                 icon: const Icon(
                                   Icons.settings,
-                                  color: const Color.fromARGB(255, 2, 92, 50),
+                                  color: Color.fromARGB(255, 2, 92, 50),
                                 ),
                                 onPressed: () {
-                                  // Navigate to the SettingsScreen when the settings icon is pressed
                                   print('Settings tapped');
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //       builder: (context) => const Settings()),
-                                  // );
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => Settings(
                                         onPDFSelectionChanged:
                                             (isPortraitOptimized) {
-                                          // Reload the PDF viewer with the updated PDF selection
                                           _loadSelectedPDF();
                                         },
                                         onFitPolicyChanged:
@@ -441,7 +438,12 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                         },
                                       ),
                                     ),
-                                  );
+                                  ).then((_) {
+                                    setState(() {
+                                      _loadSelectedPDF();
+                                      _loadFitPolicy();
+                                    });
+                                  });
                                 },
                               ),
                             ],
