@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
@@ -48,7 +49,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   final List<Bookmark> _bookmarks = [];
   String selectedPortraitPDF = 'quran_source_v_l_s.pdf';
   bool isOptimizedLandscape = false;
-  FitPolicy fitPolicy = FitPolicy.BOTH;
+  FitPolicy fitPolicy = FitPolicy.WIDTH;
 
   void _addBookmark() {
     int pageNumber = _isPortrait
@@ -175,11 +176,10 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     bool optimizedLandscape = await StorageManager.getOptimizedLandscape();
     print('changing policy $optimizedLandscape');
     setState(() {
-      fitPolicy = optimizedLandscape ? FitPolicy.BOTH : FitPolicy.BOTH;
-      // isOptimizedLandscape = optimizedLandscape;
-      // print('changing policy $optimizedLandscape');
-      // _pdfViewController = null; // Reset the PDFViewController
-      // pdfPathsFuture = loadPDFFromAssets(); // Reload PDF paths
+      isOptimizedLandscape = optimizedLandscape;
+      fitPolicy =
+          optimizedLandscape && !_isPortrait ? FitPolicy.WIDTH : FitPolicy.BOTH;
+      print('policy os $fitPolicy');
     });
   }
 
@@ -193,6 +193,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
             _isPortrait = isPortrait;
             _orientationChanging = true;
             _pdfViewController = null; // Reset controller to force rebuild
+            _loadFitPolicy();
           }
 
           return FutureBuilder<Map<String, String>>(
@@ -219,7 +220,9 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                       key: ValueKey(pdfPath), // Force reload by changing key
                       filePath: pdfPath,
                       swipeHorizontal: true,
-                      fitPolicy: fitPolicy,
+                      fitPolicy: isOptimizedLandscape && !_isPortrait
+                          ? FitPolicy.WIDTH
+                          : FitPolicy.BOTH,
                       onRender: (pages) {
                         print('onrender current page is now $_currentPage');
                         setState(() {
