@@ -3,8 +3,13 @@ import 'package:quran_double_page/model/storage.dart';
 
 class Settings extends StatefulWidget {
   final void Function(bool isOptimizedPortrait) onPDFSelectionChanged;
+  final void Function(bool isOptimizedLandscape)
+      onFitPolicyChanged; // Callback for landscape
 
-  const Settings({super.key, required this.onPDFSelectionChanged});
+  const Settings(
+      {super.key,
+      required this.onPDFSelectionChanged,
+      required this.onFitPolicyChanged});
 
   @override
   State<Settings> createState() => _SettingsState();

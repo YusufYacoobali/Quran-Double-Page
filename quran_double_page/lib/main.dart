@@ -47,6 +47,8 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   Timer? _hideScrollbarTimer; // Timer to hide the scrollbar
   final List<Bookmark> _bookmarks = [];
   String selectedPortraitPDF = 'quran_source_v_l_s.pdf';
+  bool isOptimizedLandscape = false;
+  FitPolicy fitPolicy = FitPolicy.BOTH;
 
   void _addBookmark() {
     int pageNumber = _isPortrait
@@ -103,13 +105,13 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   @override
   void initState() {
     super.initState();
-
     pdfPathsFuture = loadPDFFromAssets();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _startHideScrollbarTimer(); // Start the timer when the widget initializes
     _loadBookmarks();
     _loadCurrentPage();
     _loadSelectedPDF();
+    _loadFitPolicy();
     print('at the end $selectedPortraitPDF is pdf');
   }
 
@@ -136,6 +138,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   }
 
   Future<Map<String, String>> loadPDFFromAssets() async {
+    isOptimizedLandscape = isOptimizedLandscape;
     print('loading asset $selectedPortraitPDF is pdf');
     final ByteData dataPortrait =
         await rootBundle.load('assets/$selectedPortraitPDF');
@@ -165,6 +168,18 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
           isOptimizedPortrait ? 'quran_source_v_l_s.pdf' : 'quran_source_v.pdf';
       print('load selected $selectedPortraitPDF is pdf');
       pdfPathsFuture = loadPDFFromAssets(); // Reload PDF paths
+    });
+  }
+
+  Future<void> _loadFitPolicy() async {
+    bool optimizedLandscape = await StorageManager.getOptimizedLandscape();
+    print('changing policy $optimizedLandscape');
+    setState(() {
+      fitPolicy = optimizedLandscape ? FitPolicy.BOTH : FitPolicy.BOTH;
+      // isOptimizedLandscape = optimizedLandscape;
+      // print('changing policy $optimizedLandscape');
+      // _pdfViewController = null; // Reset the PDFViewController
+      // pdfPathsFuture = loadPDFFromAssets(); // Reload PDF paths
     });
   }
 
@@ -204,7 +219,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                       key: ValueKey(pdfPath), // Force reload by changing key
                       filePath: pdfPath,
                       swipeHorizontal: true,
-                      fitPolicy: FitPolicy.BOTH,
+                      fitPolicy: fitPolicy,
                       onRender: (pages) {
                         print('onrender current page is now $_currentPage');
                         setState(() {
@@ -261,22 +276,24 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 2, 92, 50),
+                            color: const Color(0xFFFBFBFB),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
                               Text(
                                 '${MediaQuery.of(context).orientation == Orientation.landscape ? ((_totalPages - _currentPage) * 2 - 1) : (_totalPages - _currentPage)}/${MediaQuery.of(context).orientation == Orientation.landscape ? (_totalPages * 2 - 1) : _totalPages}',
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(
+                                  color: const Color.fromARGB(255, 2, 92, 50),
+                                ),
                               ),
                               Expanded(
                                 child: Slider(
-                                  activeColor: const Color(0xFF7EA16B),
+                                  activeColor:
+                                      const Color.fromARGB(255, 2, 92, 50),
                                   thumbColor:
                                       const Color.fromARGB(255, 175, 132, 4),
-                                  inactiveColor:
-                                      const Color.fromARGB(255, 175, 132, 4),
+                                  inactiveColor: const Color(0xFFD9B44A),
                                   value: _currentPage.toDouble(),
                                   min: 0,
                                   max: (_totalPages - 1).toDouble(),
@@ -293,8 +310,8 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                               ),
                               IconButton(
                                 icon: const Icon(
-                                  Icons.bookmarks_outlined,
-                                  color: Colors.white,
+                                  Icons.bookmarks_rounded,
+                                  color: const Color.fromARGB(255, 2, 92, 50),
                                 ),
                                 onPressed: () {
                                   showModalBottomSheet(
@@ -395,8 +412,8 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                               ),
                               IconButton(
                                 icon: const Icon(
-                                  Icons.settings_outlined,
-                                  color: Colors.white,
+                                  Icons.settings,
+                                  color: const Color.fromARGB(255, 2, 92, 50),
                                 ),
                                 onPressed: () {
                                   // Navigate to the SettingsScreen when the settings icon is pressed
@@ -414,6 +431,10 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                                             (isPortraitOptimized) {
                                           // Reload the PDF viewer with the updated PDF selection
                                           _loadSelectedPDF();
+                                        },
+                                        onFitPolicyChanged:
+                                            (isOptimizedLandscape) {
+                                          _loadFitPolicy();
                                         },
                                       ),
                                     ),
