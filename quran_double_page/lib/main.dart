@@ -223,6 +223,8 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                     PDFView(
                       key: ValueKey(pdfPath), // Force reload by changing key
                       filePath: pdfPath,
+                      pageSnap: true,
+                      autoSpacing: true,
                       swipeHorizontal: true,
                       fitPolicy: isOptimizedLandscape && !_isPortrait
                           ? FitPolicy.WIDTH
