@@ -176,7 +176,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
   Future<Map<String, String>> loadPDFFromAssets() async {
     isOptimizedLandscape = isOptimizedLandscape;
     final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final Directory tempDir = await getTemporaryDirectory();
 
     print('Getting PDFs...');
 
@@ -186,35 +185,12 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
 
     // Check if files exist in app directory
     if (await portraitPDF.exists() && await landscapePDF.exists()) {
-      print(
-          'Files already exist in app directory. Copying to temp directory...');
-
-      final int size = await portraitPDF.length();
+      final int size = await landscapePDF.length();
       print('err1 PDF file size: $size bytes');
 
-      final File tempPortraitPDF = File('${tempDir.path}/$selectedPortraitPDF');
-      final File tempLandscapePDF =
-          File('${tempDir.path}/quran_source_double_close.pdf');
-
-      //        final File tempFilePortrait = File('${tempDir.path}/$selectedPortraitPDF');
-      // await tempFilePortrait.writeAsBytes(dataPortrait.buffer.asUint8List(),
-      //     flush: true);
-
-      //Copy files to temp directory
-      await tempPortraitPDF.create();
-      await tempPortraitPDF.writeAsBytes(await portraitPDF.readAsBytes(),
-          flush: true);
-
-      await tempLandscapePDF.create();
-      await tempLandscapePDF.writeAsBytes(await landscapePDF.readAsBytes());
-
-      print('Files copied to temp directory:');
-      print('Portrait PDF: ${tempPortraitPDF.path}');
-      print('Landscape PDF: ${tempLandscapePDF.path}');
-
       return {
-        'portrait': tempPortraitPDF.path,
-        'landscape': tempLandscapePDF.path,
+        'portrait': portraitPDF.path,
+        'landscape': landscapePDF.path,
       };
     } else {
       throw Exception("PDF files are missing in the app directory.");
