@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
@@ -138,30 +137,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     });
     _startHideScrollbarTimer(); // Restart the timer when screen is tapped
   }
-
-  // Future<Map<String, String>> loadPDFFromAssets() async {
-  //   isOptimizedLandscape = isOptimizedLandscape;
-  //   print('loading asset $selectedPortraitPDF is pdf');
-  //   final ByteData dataPortrait =
-  //       await rootBundle.load('assets/$selectedPortraitPDF');
-  //   final ByteData dataLandscape =
-  //       await rootBundle.load('assets/quran_source_double_close.pdf');
-  //   final Directory tempDir = await getTemporaryDirectory();
-
-  //   final File tempFilePortrait = File('${tempDir.path}/$selectedPortraitPDF');
-  //   await tempFilePortrait.writeAsBytes(dataPortrait.buffer.asUint8List(),
-  //       flush: true);
-
-  //   final File tempFileLandscape =
-  //       File('${tempDir.path}/quran_source_double_close.pdf');
-  //   await tempFileLandscape.writeAsBytes(dataLandscape.buffer.asUint8List(),
-  //       flush: true);
-
-  //   return {
-  //     'portrait': tempFilePortrait.path,
-  //     'landscape': tempFileLandscape.path,
-  //   };
-  // }
 
   Future<void> _loadSelectedPDF() async {
     bool isOptimizedPortrait = await StorageManager.getOptimizedPortrait();
