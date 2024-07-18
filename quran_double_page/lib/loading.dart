@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_double_page/main.dart';
@@ -23,12 +24,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> _checkAndDownloadAssets() async {
     print('err1 checking');
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool assetsDownloaded = prefs.getBool('19assetsDownloaded1') ?? false;
+    bool assetsDownloaded = prefs.getBool('22assetsDownloaded1') ?? false;
 
     if (!assetsDownloaded) {
       print('err1 not downloaded');
       await _downloadAssets();
-      await prefs.setBool('19assetsDownloaded1', true);
+      await prefs.setBool('22assetsDownloaded1', true);
     }
 
     setState(() {
@@ -47,7 +48,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     var status = await Permission.manageExternalStorage.request();
     print('err1 gotten storage permission');
 
-    if (!status.isGranted) {
+    while (!status.isGranted) {
       status = await Permission.storage.request();
     }
 
@@ -98,8 +99,31 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF2A6767), // Islamic-themed color
       body: Center(
-        child: _isLoading ? CircularProgressIndicator() : Container(),
+        child: _isLoading
+            ? const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Custom loading animation
+                  SpinKitCubeGrid(
+                    color: Colors.white,
+                    size: 80.0,
+                  ),
+                  SizedBox(height: 20),
+                  // Informative message
+                  Text(
+                    'Please ensure WiFi is enabled\nand storage access is granted\nAllow a moment to setup',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              )
+            : Container(),
       ),
     );
   }
