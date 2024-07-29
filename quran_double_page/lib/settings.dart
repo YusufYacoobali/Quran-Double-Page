@@ -29,6 +29,7 @@ class _SettingsState extends State<Settings> {
   Future<void> _loadSwitchStates() async {
     final portrait = await StorageManager.getOptimizedPortrait();
     final landscape = await StorageManager.getOptimizedLandscape();
+    _saveOptimizedPortrait(true);
     setState(() {
       isOptimizedPortrait = portrait;
       isOptimizedLandscape = landscape;
