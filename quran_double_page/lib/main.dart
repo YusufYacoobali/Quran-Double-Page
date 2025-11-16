@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_double_page/bookmark.dart';
+import 'package:quran_double_page/loading.dart';
 import 'package:quran_double_page/model/bookmark.dart';
 import 'package:quran_double_page/model/storage.dart';
 import 'package:quran_double_page/settings.dart';
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyPDFViewer(),
+      home: LoadingScreen(),
     );
   }
 }
@@ -138,30 +138,6 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
     _startHideScrollbarTimer(); // Restart the timer when screen is tapped
   }
 
-  Future<Map<String, String>> loadPDFFromAssets() async {
-    isOptimizedLandscape = isOptimizedLandscape;
-    print('loading asset $selectedPortraitPDF is pdf');
-    final ByteData dataPortrait =
-        await rootBundle.load('assets/$selectedPortraitPDF');
-    final ByteData dataLandscape =
-        await rootBundle.load('assets/quran_source_double_close.pdf');
-    final Directory tempDir = await getTemporaryDirectory();
-
-    final File tempFilePortrait = File('${tempDir.path}/$selectedPortraitPDF');
-    await tempFilePortrait.writeAsBytes(dataPortrait.buffer.asUint8List(),
-        flush: true);
-
-    final File tempFileLandscape =
-        File('${tempDir.path}/quran_source_double_close.pdf');
-    await tempFileLandscape.writeAsBytes(dataLandscape.buffer.asUint8List(),
-        flush: true);
-
-    return {
-      'portrait': tempFilePortrait.path,
-      'landscape': tempFileLandscape.path,
-    };
-  }
-
   Future<void> _loadSelectedPDF() async {
     bool isOptimizedPortrait = await StorageManager.getOptimizedPortrait();
     setState(() {
@@ -170,6 +146,30 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
       print('load selected $selectedPortraitPDF is pdf');
       pdfPathsFuture = loadPDFFromAssets(); // Reload PDF paths
     });
+  }
+
+  Future<Map<String, String>> loadPDFFromAssets() async {
+    isOptimizedLandscape = isOptimizedLandscape;
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+
+    print('Getting PDFs...');
+
+    final File portraitPDF = File('${appDocDir.path}/$selectedPortraitPDF');
+    final File landscapePDF =
+        File('${appDocDir.path}/quran_source_double_close.pdf');
+
+    // Check if files exist in app directory
+    if (await portraitPDF.exists() && await landscapePDF.exists()) {
+      final int size = await landscapePDF.length();
+      print('err1 PDF file size: $size bytes');
+
+      return {
+        'portrait': portraitPDF.path,
+        'landscape': landscapePDF.path,
+      };
+    } else {
+      throw Exception("PDF files are missing in the app directory.");
+    }
   }
 
   Future<void> _loadFitPolicy() async {
@@ -215,7 +215,7 @@ class _MyPDFViewerState extends State<MyPDFViewer> {
                 final String pdfPath = isPortrait
                     ? snapshot.data!['portrait']!
                     : snapshot.data!['landscape']!;
-                print('Displaying PDF: $pdfPath');
+                print('err1 Displaying PDF: $pdfPath');
 
                 return Stack(
                   alignment: Alignment.center,
