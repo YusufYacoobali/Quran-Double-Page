@@ -1,10 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-package="com.quran.quran_double_page">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="Quran 2 Page"
+        android:label="quran_double_page"
         android:name="${applicationName}"
-        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -34,13 +31,6 @@ package="com.quran.quran_double_page">
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" /> -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-
-
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
